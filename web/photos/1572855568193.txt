@@ -1,0 +1,26 @@
+﻿sudo apt-get update
+apt-get install python-pip
+pip install shadowsocks
+vi /etc/shadowsocks.json
+{
+    "server":"167.71.127.145",
+    "server_port":1988,
+    "local_address":"127.0.0.1",
+    "local_port":1080,
+    "password":"wyx123456",
+    "timeout":300,
+    "method":"aes-256-cfb",
+    "fast_open":false
+}
+vim /usr/local/lib/python2.7/dist-packages/shadowsocks/crypto/openssl.py  【52和111cleanup改为reset】
+
+
+
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sysctl -p
+
+sysctl net.ipv4.tcp_available_congestion_control
+lsmod | grep bbr
+
+ssserver -c /etc/shadowsocks.json -d start
