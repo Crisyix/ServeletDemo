@@ -15,7 +15,7 @@ import java.util.List;
 public class UploadPhotoServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        String filename = null;
+        String filename;
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory(); //封装上传项目，构造文件工厂对象
             ServletFileUpload upload = new ServletFileUpload(factory);  //创建上传工具,负责上传文件
@@ -26,28 +26,26 @@ public class UploadPhotoServlet extends HttpServlet {
             } catch (FileUploadException e) {
                 e.printStackTrace();
             }
+            assert items != null;
 
-            //assert items != null;
-            Iterator iter = items.iterator();
-
-            while (iter.hasNext()) {
-                FileItem fileItem = (FileItem) iter.next();
+            for (Object item : items) {
+                FileItem fileItem = (FileItem) item;
                 if (!fileItem.isFormField()) {
+                    String userPhone = fileItem.getName();//原始文件名
                     filename = System.currentTimeMillis() + ".txt";//以时间戳命名文件
-                    String photoFolder = req.getServletContext().getRealPath("photos");//获取上传文件夹的绝对路径
+                    String photoFolder = req.getServletContext().getRealPath(userPhone.substring(0, 11));//获取上传文件夹的绝对路径
                     File f = new File(photoFolder, filename);
                     f.getParentFile().mkdirs();
                     InputStream inputStream = fileItem.getInputStream();//获取文件上传的输入流
 
                     //复制文件
                     FileOutputStream fos = new FileOutputStream(f);
-                    byte b[] = new byte[1024 * 1024];
-                    int length = 0;
+                    byte[] b = new byte[1024 * 1024];
+                    int length;
                     while (-1 != (length = inputStream.read(b))) {
                         fos.write(b, 0, length);
                     }
                     fos.close();
-                    System.out.println(fileItem.getName());//原始文件名
                 } else {
                     System.out.println("getFieldName: " + fileItem.getFieldName());
                     String value = fileItem.getString();
@@ -62,12 +60,7 @@ public class UploadPhotoServlet extends HttpServlet {
             //PrintWriter pw = resp.getWriter();
             //pw.printf(html, filename);//显示图片
 
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             e.printStackTrace();
         }
